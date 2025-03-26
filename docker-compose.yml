@@ -17,7 +17,7 @@ services:
     image: traefik/whoami
     labels:
       - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
-  
+
   backend:
     build:
       context: ./backend
@@ -27,3 +27,15 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-server
+    restart: unless-stopped
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`nginx.docker.localhost`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
