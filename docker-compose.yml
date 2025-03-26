@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   reverse-proxy:
     # The official v3 Traefik docker image
@@ -19,3 +17,13 @@ services:
     image: traefik/whoami
     labels:
       - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+  
+  backend:
+    build:
+      context: ./backend
+    container_name: node-backend
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
