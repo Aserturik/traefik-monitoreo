@@ -1,29 +1,24 @@
 services:
   reverse-proxy:
-    image: traefik:v3.3
+    image: traefik:v2.10
     command:
       - "--api.insecure=true"
       - "--providers.docker"
       - "--accesslog=true"
       - "--accesslog.filepath=/dev/stdout"
       - "--accesslog.format=json"
-      #- "--accesslog.filters.statusCodes=400-499,500-599"
-      #- "--accesslog.filters.retryAttempts=true"
-      #- "--accesslog.filters.minDuration=10ms"
     ports:
       - "80:80"
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      # Middleware para agregar encabezados de tracking
       - "traefik.http.middlewares.req-headers.headers.customrequestheaders.X-Request-ID=requestid"
       - "traefik.http.middlewares.req-headers.headers.customrequestheaders.X-Trace-Time=responsetime"
       - "traefik.http.middlewares.test-auth.basicauth.users=alex:$$2y$$05$$pEfyQFy5gONDUHId6qvbz.WHha5CP8mMtS.FISGnjH.FpaIV8Kju2"
-      - "traefik.http.routers.app.middlewares=ratelimiter"
-      # Middleware para limitación de velocidad
-      - "traefik.http.middlewares.ratelimiter.ratelimit.average=10"  # 10 solicitudes por segundo
-      - "traefik.http.middlewares.ratelimiter.ratelimit.burst=20"    # Se permite una ráfaga de hasta 20 solicitudes
+      - "traefik.http.middlewares.error-pages.errors.status=404-500"
+      - "traefik.http.middlewares.error-pages.errors.service=nginx"
+      - "traefik.http.middlewares.error-pages.errors.query=/error.html"
 
   whoami:
     image: traefik/whoami
@@ -38,9 +33,47 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.middlewares=test-auth,req-headers,error-pages"
+
+  backend-replica-1:
+    build:
+      context: ./backend
+    container_name: node-backend-replica-1
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
       - "traefik.http.routers.backend.middlewares=test-auth,req-headers"
+
+  backend-replica-2:
+    build:
+      context: ./backend
+    container_name: node-backend-replica-2
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.middlewares=test-auth,req-headers"
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
 
   nginx:
     image: nginx:alpine
@@ -51,6 +84,9 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nginx.rule=Host(`nginx.docker.localhost`)"
-      - "traefik.http.routers.nginx.middlewares=test-auth,req-headers"
+      - "traefik.http.routers.nginx.rule=Host(`nginx.localhost`)"
+      - "traefik.http.routers.nginx.middlewares=req-headers"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
+volumes:
+  grafana-data:
