@@ -46,7 +46,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend-replica-1.rule=Host(`api.localhost`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend-replica-1.middlewares=test-auth,req-headers"
+      - "traefik.http.routers.backend-replica-1.middlewares=test-auth,req-headers,error-pages"
 
   backend-replica-2:
     build:
@@ -57,7 +57,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend-replica-2.rule=Host(`api.localhost`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend-replica-2.middlewares=test-auth,req-headers"
+      - "traefik.http.routers.backend-replica-2.middlewares=test-auth,req-headers,error-pages"
 
   prometheus:
     image: prom/prometheus
@@ -85,7 +85,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=Host(`nginx.localhost`)"
-      - "traefik.http.routers.nginx.middlewares=req-headers"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
 
 volumes:
