@@ -44,9 +44,9 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.backend-replica-1.rule=Host(`api.localhost`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend.middlewares=test-auth,req-headers"
+      - "traefik.http.routers.backend-replica-1.middlewares=test-auth,req-headers"
 
   backend-replica-2:
     build:
@@ -55,9 +55,9 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.backend-replica-2.rule=Host(`api.localhost`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend.middlewares=test-auth,req-headers"
+      - "traefik.http.routers.backend-replica-2.middlewares=test-auth,req-headers"
 
   prometheus:
     image: prom/prometheus
@@ -71,7 +71,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - grafana-data:/var/lib/grafana
 
