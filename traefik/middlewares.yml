@@ -1,0 +1,17 @@
+# Middleware globales
+http:
+  middlewares:
+    req-headers:
+      headers:
+        customRequestHeaders:
+          X-Request-ID: "requestid"
+          X-Trace-Time: "responsetime"
+    test-auth:
+      basicAuth:
+        users:
+          - "alex:$2y$05$pEfyQFy5gONDUHId6qvbz.WHha5CP8mMtS.FISGnjH.FpaIV8Kju2"
+    error-pages:
+      errors:
+        status: ["404-500"]
+        service: "nginx@docker"
+        query: "/error.html"

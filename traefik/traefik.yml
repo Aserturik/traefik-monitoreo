@@ -8,6 +8,14 @@ api:
   insecure: true  # Habilita el dashboard en modo inseguro (solo para pruebas)
 
 providers: 
+  file:
+    directory: "/etc/traefik/dynamic"
+    watch: true
   docker: 
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
+
+# Configuración de logs de acceso
+accessLog:
+  filePath: "/dev/stdout"
+  format: "json"
