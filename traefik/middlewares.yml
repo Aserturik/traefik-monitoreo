@@ -15,3 +15,22 @@ http:
         status: ["404-500"]
         service: "nginx@docker"
         query: "/error.html"
+    # Middleware para acceso a /admin solo desde IPs específicas
+    admin-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "192.168.1.0/24"  # Ejemplo: rango de IPs locales permitidas
+          - "10.0.0.1"        # Ejemplo: IP específica permitida
+    
+    # Middleware para detectar si el usuario está autenticado
+    authenticated-users:
+      chain:
+        middlewares:
+          - "test-auth@file"  # Usa la autenticación básica existente
+          - "auth-marker@file"
+    
+    # Middleware para marcar usuarios autenticados
+    auth-marker:
+      headers:
+        customRequestHeaders:
+          X-User-Authenticated: "true"

@@ -9,6 +9,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml
       - ./traefik/middlewares.yml:/etc/traefik/dynamic/middlewares.yml
+      - ./traefik/routers.yml:/etc/traefik/dynamic/routers.yml
 
   whoami:
     image: traefik/whoami

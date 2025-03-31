@@ -1,0 +1,41 @@
+# Configuración de routers dinámicos
+http:
+  routers:
+    # Router para usuarios autenticados
+    authenticated-router:
+      rule: "Headers(`X-User-Authenticated`, `true`)"
+      priority: 100  # Prioridad alta para este router
+      service: "backend-service@docker"
+      middlewares:
+        - "req-headers@file"
+    
+    # Router para rutas admin con whitelist de IPs
+    admin-router:
+      rule: "PathPrefix(`/admin`)"
+      priority: 200  # Prioridad muy alta para este router
+      service: "backend-service@docker"
+      middlewares:
+        - "admin-whitelist@file"
+        - "test-auth@file"
+        - "req-headers@file"
+    
+    # Router para alta carga (será activado por un script externo)
+    high-load-router:
+      rule: "Headers(`X-Traffic-Load`, `high`)"
+      priority: 150
+      service: "backup-service"
+      middlewares:
+        - "req-headers@file"
+  
+  # Servicio de respaldo para momentos de alta carga
+  services:
+    backup-service:
+      loadBalancer:
+        servers:
+          - url: "http://backend-replica-1:3000"
+          - url: "http://backend-replica-2:3000"
+        # Estrategia de balanceo para distribuir la carga
+        healthCheck:
+          path: "/health"
+          interval: "10s"
+          timeout: "3s"
