@@ -1,3 +1,7 @@
+## Integrantes:
+  - Alex Duvan Hernández Buitrago
+  - Yesid Alejandro Martinez Guerrero
+
 # Traefik Monitoreo - Arquitectura y Configuración
 
 ## 1. Estructura del Proyecto
@@ -190,7 +194,7 @@ Para agregar reglas de enrutamiento adicionales, puedes:
 
 1. **Clonar o descargar el repositorio**:
    ```bash
-   git clone <URL-del-repositorio>
+   git clone https://github.com/Aserturik/traefik-monitoreo.git
    cd traefik-monitoreo
    ```
 
