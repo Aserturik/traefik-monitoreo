@@ -15,6 +15,14 @@ providers:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
 
+# Configuración de métricas
+metrics:
+  prometheus:
+    entryPoint: web
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    manualRouting: false
+
 # Configuración de logs de acceso
 accessLog:
   filePath: "/dev/stdout"

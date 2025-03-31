@@ -2,6 +2,16 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
   - job_name: "traefik"
     static_configs:
       - targets: ["reverse-proxy:8080"]
+    metrics_path: /metrics
+
+  - job_name: "traefik-metrics"
+    static_configs:
+      - targets: ["reverse-proxy:80"]
+    metrics_path: /metrics
